@@ -194,14 +194,7 @@ var _ = {};
   _.every = function(collection, iterator) {
     // TIP: Try re-using reduce() here.
     iterator = iterator|| _.identity;
-    // var temp = _.filter(collection, function(item){
-    //   return iterator(item);
-    // });
-    // if (temp.length === collection.length){
-    //   return true;
-    // }else{
-    //   return false;
-    // }
+
     return _.reduce(collection, function(acc, item){
       if(acc){
         acc = iterator(item);
@@ -214,6 +207,10 @@ var _ = {};
   // provided, provide a default one
   _.some = function(collection, iterator) {
     // TIP: There's a very clever way to re-use every() here.
+    iterator = iterator || _.identity;
+    return !_.every(collection, function(item){
+      return !iterator(item);
+    });
   };
 
 
