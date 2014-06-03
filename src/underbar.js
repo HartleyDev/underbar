@@ -105,6 +105,14 @@ var _ = {};
 
   // Produce a duplicate-free version of the array.
   _.uniq = function(array) {
+    var hash = {};
+    var results = [];
+
+    _.each(array, function(item){
+      hash[item] || results.push(item);
+      hash[item] = true;
+    });
+    return results;
   };
 
 
