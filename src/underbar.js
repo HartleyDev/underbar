@@ -168,6 +168,13 @@ var _ = {};
   //     return total + number;
   //   }, 0); // should be 6
   _.reduce = function(collection, iterator, accumulator) {
+    //know: accum can be undefinded or anything
+    //iterator use each
+    accumulator === undefined ? collection.unshift() : accumulator;
+    _.each(collection, function(number){
+      accumulator = iterator(accumulator, number);
+    });
+    return accumulator;
   };
 
   // Determine if the array or object contains a given value (using `===`).
