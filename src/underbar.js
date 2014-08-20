@@ -39,14 +39,14 @@ var _ = {};
   // Like first, but for the last elements. If n is undefined, return just the
   // last element.
   _.last = function(array, n) {
-    var len = array.length;
-    var last = len - 1;
-    var start = len - n;
-
-    if(n > len){
-      return array;
-    }else
-      return n === undefined ? array[last] : array.slice(start,len);
+    if( n > array.length){
+      n = array.length;
+    }
+    if (n === undefined){
+      return array[array.length - 1];
+    }else{
+      return array.slice(array.length - n);
+    }
   };
 
   // Call iterator(value, key, collection) for each element of collection.
@@ -86,9 +86,10 @@ var _ = {};
   // Return all elements of an array that pass a truth test.
   _.filter = function(collection, test) {
     var result = [];
-    _.each(collection, function (e){
-      if (test(e)) {
-        result.push(e);
+
+    _.each(collection, function(item){
+      if(test(item)){
+        result.push(item);
       }
     });
     return result;
@@ -106,21 +107,18 @@ var _ = {};
     }
 
     return _.filter(collection, negate(test));
-
   };
 
   // Produce a duplicate-free version of the array.
   _.uniq = function(array) {
-    array = array.sort();
-    var newArr = [];
-    newArr.push(array[0]);
-    
-    for(var i = 0; i < array.length; i++){
-        if(newArr[newArr.length-1] != array[i]){
-            newArr.push(array[i]);
-        }
-    }
-    return newArr;
+    var hash = {};
+    var results = [];
+
+    _.each(array, function(item){
+      hash[item] || results.push(item);
+      hash[item] = true;
+    });
+    return results;
   };
 
 
@@ -130,8 +128,8 @@ var _ = {};
     // like each(), but in addition to running the operation on all
     // the members, it also maintains an array of results.
     var results = [];
-    _.each(collection, function(e){
-      results.push(iterator(e));
+    _.each(collection, function(item, pos, col){
+      results.push(iterator(item, pos, col));
     });
     return results;
   };
@@ -157,9 +155,8 @@ var _ = {};
   // Calls the method named by methodName on each value in the list.
   // Note: you will nead to learn a bit about .apply to complete this.
   _.invoke = function(collection, functionOrKey, args) {
-    var isFunc = (typeof functionOrKey == 'function');
-    return _.map(collection, function(item) {
-      return (isFunc ? functionOrKey : item[functionOrKey]).apply(item, args);
+    return _.map(collection, function(item){
+      return (typeof functionOrKey === 'string' ? item[functionOrKey] : functionOrKey).apply(item, args);
     });
   };
 
@@ -177,12 +174,11 @@ var _ = {};
   //     return total + number;
   //   }, 0); // should be 6
   _.reduce = function(collection, iterator, accumulator) {
-    _.each(collection, function (e) {
-      if (accumulator == false) {
-        accumulator = iterator(accumulator, e);
-      }else { 
-        accumulator = iterator(accumulator, e) || collection[0];
-      }
+    //know: accum can be undefinded or anything
+    //iterator use each
+    accumulator === undefined ? collection.unshift() : accumulator;
+    _.each(collection, function(number){
+      accumulator = iterator(accumulator, number);
     });
     return accumulator;
   };
@@ -203,17 +199,14 @@ var _ = {};
   // Determine whether all of the elements match a truth test.
   _.every = function(collection, iterator) {
     // TIP: Try re-using reduce() here.
-    var tally = 0;
-    iterator = iterator || _.identity;
-    _.each(collection, function(item){
-      if(iterator(item)){
-        tally += 1;
+    iterator = iterator|| _.identity;
+
+    return _.reduce(collection, function(acc, item){
+      if(acc){
+        acc = iterator(item);
       }
-    });
-    if(tally === collection.length){
-      return true;
-    }else 
-      return false;
+      return !!acc;
+    },true);
   };
 
   // Determine whether any of the elements pass a truth test. If no iterator is
@@ -221,14 +214,9 @@ var _ = {};
   _.some = function(collection, iterator) {
     // TIP: There's a very clever way to re-use every() here.
     iterator = iterator || _.identity;
-    if(collection.length < 1) { return false; }
-    var result = false;
-    _.each(collection, function(e){
-      if(iterator(e)){
-        result = true;
-      }
+    return !_.every(collection, function(item){
+      return !iterator(item);
     });
-    return result;
   };
 
 
